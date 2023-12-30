@@ -8,17 +8,20 @@ jobs:
   build:
     runs-on: ubuntu-20.04
 
+    strategy:
+      matrix:
+        node-version: [16.x]
+
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
         with:
-          persist-credentials: false # Ensure Git config is not persisted
+          node-version: ${{ matrix.node-version }}
 
       - name: Get Date
         id: get-date
         run: |
-          echo "::set-output name=date::$(/bin/date -u "+%Y%m%d")"
-        shell: bash
+          echo "DATE=$(date -u "+%Y%m%d")" >> $GITHUB_ENV
 
       - name: Cache Buildozer global directory
         uses: actions/cache@v2
@@ -30,7 +33,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .buildozer
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+          key: ${{ runner.os }}-${{ env.DATE }}-${{ hashFiles('buildozer.spec') }}
 
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
