@@ -11,6 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+        # Explicitly set Node.js version to 16
+        with:
+          node-version: 16
 
       - name: Get Date
         id: get-date
