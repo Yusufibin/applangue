@@ -11,7 +11,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-        # Explicitly set Node.js version to 16
         with:
           node-version: 16
 
@@ -32,6 +31,9 @@ jobs:
         with:
           path: .buildozer
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
+
+      - name: Create workspace directory
+        run: mkdir -p ${{ github.workspace }}
 
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
