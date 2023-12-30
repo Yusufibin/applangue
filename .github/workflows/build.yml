@@ -12,7 +12,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
         with:
-          node-version: 16
+          persist-credentials: false # Ensure Git config is not persisted
 
       - name: Get Date
         id: get-date
@@ -31,9 +31,6 @@ jobs:
         with:
           path: .buildozer
           key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('buildozer.spec') }}
-
-      - name: Create workspace directory
-        run: mkdir -p ${{ github.workspace }}
 
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
