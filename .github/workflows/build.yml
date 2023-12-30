@@ -28,12 +28,16 @@ jobs:
         with:
           path: .buildozer_global
           key: buildozer-global-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            buildozer-global-
 
       - name: Cache Buildozer directory
         uses: actions/cache@v2
         with:
           path: .buildozer
           key: ${{ runner.os }}-${{ env.DATE }}-${{ hashFiles('buildozer.spec') }}
+          restore-keys: |
+            ${{ runner.os }}-${{ env.DATE }}-
 
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
