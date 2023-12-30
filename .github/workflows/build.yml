@@ -1,49 +1,21 @@
-name: CI
-
-on:
-  push:
-    branches: [main]
+name: Build
+on: [push, pull_request]
 
 jobs:
-  build:
-    runs-on: ubuntu-20.04
-
-    strategy:
-      matrix:
-        node-version: [16.x]
+  # Build job. Builds app for Android with Buildozer
+  build-android:
+    name: Build for Android
+    runs-on: ubuntu-latest
 
     steps:
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-
-      - name: Get Date
-        id: get-date
-        run: |
-          echo "DATE=$(date -u "+%Y%m%d")" >> $GITHUB_ENV
-
-      - name: Cache Buildozer global directory
-        uses: actions/cache@v2
-        with:
-          path: .buildozer_global
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            buildozer-global-
-
-      - name: Cache Buildozer directory
-        uses: actions/cache@v2
-        with:
-          path: .buildozer
-          key: ${{ runner.os }}-${{ env.DATE }}-${{ hashFiles('buildozer.spec') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ env.DATE }}-
+      - name: Checkout
+        uses: actions/checkout@v2
 
       - name: Build with Buildozer
         uses: ArtemSBulgakov/buildozer-action@v1
         id: buildozer
         with:
-          command: buildozer android debug
+          workdir: test_app
           buildozer_version: stable
 
       - name: Upload artifacts
