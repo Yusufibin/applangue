@@ -18,9 +18,11 @@ jobs:
       with:
         python-version: 3.x
 
+    - name: Install Python development tools
+      run: sudo apt-get install python3-dev
+
     - name: Install dependencies
       run: |
-        pip install distutils
         pip install buildozer
         # Add any other dependencies your project needs
 
