@@ -20,6 +20,7 @@ jobs:
 
     - name: Install dependencies
       run: |
+        pip install distutils
         pip install buildozer
         # Add any other dependencies your project needs
 
