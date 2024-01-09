@@ -1,45 +1,54 @@
-name: Build and Deploy
-
+name: Build
 on:
   push:
-    branches:
-      - main
+    branches-ignore:
+      - data
+      - gh-pages
+    tags:
+      - '**'
+  pull_request:
+    branches-ignore:
+      - data
+      - gh-pages
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  # Build job. Builds app for Android with Buildozer
+  build-android:
+    name: Build for Android
+    runs-on: ubuntu-20.04
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Cache Buildozer global directory
-        uses: actions/cache@v2
         with:
-          path: |
-            ~/.buildozer
-          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
-
-      - name: Cache Python dependencies
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.cache/pip
-          key: python-${{ hashFiles('requirements.txt') }}
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update -qy
-          sudo apt-get install -y python3 python3-pip python3-setuptools python3-wheel zlib1g-dev
-          pip3 install --upgrade pip
-          pip3 install -r requirements.txt  # Replace with your requirements file name
-
+          path: master
+               
       - name: Build with Buildozer
-        run: |
-          buildozer android debug
+        uses: ArtemSBulgakov/buildozer-action@v1
+        id: buildozer
+        with:
+          repository_root: master
+          workdir: .
+          buildozer_version: stable
 
-      - name: Upload APK artifact
+      - name: Upload artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: app
-          path: ./bin/*.apk  # Update this path based on your Buildozer output directory
+          name: package
+          path: ${{ steps.buildozer.outputs.filename }}
+
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          path: data
+          ref: data # Branch name
+          
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.7
+          architecture: x64
+
+      - name: Push binary to data branch
+        if: github.event_name == 'push'
+        run: python master/.ci/move_binary.py "${{ steps.buildozer.outputs.filename }}" master data bin
