@@ -10,19 +10,36 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Set up Python and dependencies
-      run: |
-        sudo apt-get install -y python3 python3-pip python3-setuptools python3-wheel zlib1g-dev
-        python3 -m pip install --upgrade pip
+      - name: Cache Buildozer global directory
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.buildozer
+          key: buildozer-global-${{ hashFiles('buildozer.spec') }} # Replace with your path
 
-    - name: Install buildozer and dependencies
-      run: |
-        sudo apt-get install -y cython
-        pip install buildozer
-        # Add any other dependencies your project needs
+      - name: Cache Python dependencies
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cache/pip
+          key: python-${{ hashFiles('requirements.txt') }}
 
-    - name: Build application
-      run: buildozer -v -p buildozer.spec android debug
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -qy
+          sudo apt-get install -y python3 python3-pip python3-setuptools python3-wheel zlib1g-dev
+          pip3 install --upgrade pip
+          pip3 install -r requirements.txt  # Replace with your requirements file name
+
+      - name: Build with Buildozer
+        run: |
+          buildozer android debug
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: app
+          path: ./bin/*.apk  # Update this path based on your Buildozer output directory
